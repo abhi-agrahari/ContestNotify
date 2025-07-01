@@ -37,6 +37,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
+        System.out.println("Login API hit for: " + user.getEmail());
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
         );

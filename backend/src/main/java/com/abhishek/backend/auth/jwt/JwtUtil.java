@@ -10,7 +10,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String secret =  "Secret123";
+    private final String secret =  "thisismysecretkeyforspringbootsecurityformyproject";
 
     public String generateToken(String email) {
         return Jwts.builder()
