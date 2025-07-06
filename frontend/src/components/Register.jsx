@@ -21,28 +21,33 @@ export default function Register() {
     };
 
     return(
-        <div>
-            <h2> Register </h2>
-            {message && <p>{message}</p>}
-            <form onSubmit={handleSubmit}>
+        <div className='min-h-screen bg-gray-100 flex items-center justify-center'>
+            <div className='bg-white p-8 rounded shadow-md w-full max-w-md'>
+            <h2 className='text-2xl font-bold mb-6 text-center'> Register </h2>
+            {message && <p className='text-sm text-center mb-4 text-red-500'>{message}</p>}
+            <form onSubmit={handleSubmit} className='space-y-4'>
                 <input
                     name='name'
                     placeholder='Enter Name'
                     onChange={handleChange}
+                    className='w-full px-4 py-2 border border-gray-300 rounded'
                 /><br/>
                 <input
                     name='email'
                     placeholder='Enter Email'
                     onChange={handleChange}
+                    className='w-full px-4 py-2 border border-gray-300 rounded'
                 /><br/>
                 <input
                     name='password'
                     type='password'
                     placeholder='Enter Password'
                     onChange={handleChange}
+                    className='w-full px-4 py-2 border border-gray-300 rounded'
                 /><br/>
-                <button type='submit'> Register </button>
+                <button type='submit' className='w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded'> Register </button>
             </form>
+            </div>
         </div>
     )
 }
