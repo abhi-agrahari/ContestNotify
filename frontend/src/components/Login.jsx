@@ -13,6 +13,9 @@ export default function Login() {
 
     const handleSubmit = async e => {
         e.preventDefault();
+
+        localStorage.removeItem('token');
+        
         try{
             const res = await API.post('/auth/login', form);
             localStorage.setItem('token', res.data.token);
