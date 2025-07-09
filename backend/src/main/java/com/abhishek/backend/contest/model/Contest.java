@@ -10,6 +10,5 @@ public class Contest {
     private String site;
     private String startTime;
     private String endTime;
-    private boolean in_24_hours;
-    private String status;
+    private long duration;
 }
