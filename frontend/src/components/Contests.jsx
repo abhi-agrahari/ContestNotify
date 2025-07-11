@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import Navbar from "./Navbar";
 
 export default function Contests() {
     const [contests, setContests] = useState([]);
@@ -10,10 +11,6 @@ export default function Contests() {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
       
         API.get('/contests', {
           headers: {
@@ -32,6 +29,8 @@ export default function Contests() {
       }, []);
 
     return (
+      <>
+      <Navbar />
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-4"> Upcoming Contests </h1>
             {error && <p className="text-red-500">{error}</p>}
@@ -41,6 +40,7 @@ export default function Contests() {
                         <h2 className="text-lg font-semibold">{contest.name}</h2>
                         <p><strong>Platform:</strong> {contest.platform}</p>
                         <p><strong>Start Time:</strong> {new Date(contest.startTime).toLocaleString()}</p>
+                        <p><strong>End Time:</strong> {new Date(contest.endTime).toLocaleString()}</p>
                         <p><strong>Duration:</strong> {contest.duration} mins</p>
                         <a
                             href={contest.url}
@@ -54,5 +54,6 @@ export default function Contests() {
                 ))}
             </div>
         </div>
+      </>
     )
 }
