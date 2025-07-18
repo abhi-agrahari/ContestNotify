@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,29 +17,35 @@ public class ContestService {
     public List<Contest> fetchAll() {
         try {
             RestTemplate rt = new RestTemplate();
-            String json = rt.getForObject(API_URL, String.class);
+            String json = rt.getForObject(API_URL, String.class); // Get raw JSON string
 
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> resp = mapper.readValue(json, Map.class);
+            Map<String, Object> resp = mapper.readValue(json, Map.class); // Manually parse JSON
 
-            List<Map<String, Object>> data = (List<Map<String, Object>>) resp.get("data");
-            if (data == null) return new ArrayList<>();
-
-            List<Contest> contests = new ArrayList<>();
-            for (Map<String, Object> m : data) {
-                Contest c = new Contest();
-                c.setName((String) m.get("title"));
-                c.setUrl((String) m.get("url"));
-                c.setSite((String) m.get("platform"));
-                c.setStartTime((String) m.get("startTime"));
-                c.setEndTime((String) m.get("endTime"));
-                c.setDuration(((Number) m.get("duration")).longValue());
-                contests.add(c);
+            if (resp == null || !resp.containsKey("data")) {
+                return new ArrayList<>();
             }
+
+            Map<String, List<Map<String, Object>>> data = (Map<String, List<Map<String, Object>>>) resp.get("data");
+            List<Contest> contests = new ArrayList<>();
+
+            for (List<Map<String, Object>> platformContests : data.values()) {
+                for (Map<String, Object> m : platformContests) {
+                    Contest c = new Contest();
+                    c.setName((String) m.get("title"));
+                    c.setUrl((String) m.get("url"));
+                    c.setPlatform((String) m.get("platform"));
+                    c.setStartTime((String) m.get("startTime"));
+                    c.setEndTime((String) m.get("endTime"));
+                    c.setDuration(((Number) m.get("duration")).longValue());
+                    contests.add(c);
+                }
+            }
+
             return contests;
         } catch (Exception e) {
-            System.out.println("Error fetching contests: " + e.getMessage());
-            return Collections.emptyList();
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 }

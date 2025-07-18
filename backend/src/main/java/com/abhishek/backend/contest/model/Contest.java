@@ -7,7 +7,7 @@ public class Contest {
 
     private String name;
     private String url;
-    private String site;
+    private String platform;
     private String startTime;
     private String endTime;
     private long duration;
