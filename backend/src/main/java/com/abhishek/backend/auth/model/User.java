@@ -26,7 +26,14 @@ public class User {
     private String email;
 
     private String password;
-    private int notifyBeforeMinutes;
+
+    private boolean emailEnabled = false;
+
+    private String verificationToken;
+
+    private boolean isVerified = false;
+
+    private int notifyBeforeMinutes = 10;
 
     private List<String> platformsSubscribed = new ArrayList<>();
 

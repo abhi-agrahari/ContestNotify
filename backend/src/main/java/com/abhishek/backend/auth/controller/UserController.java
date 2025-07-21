@@ -8,19 +8,20 @@ import com.abhishek.backend.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
-public class UserCntroller {
+public class UserController {
 
     @Autowired
     private UserRepository userRepo;
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -33,6 +34,7 @@ public class UserCntroller {
     public ResponseEntity<?> updatePreferences(@RequestBody PreferenceRequest req, Principal principal) {
         User user = userRepo.findByEmail(principal.getName()).orElseThrow();
         user.setPlatformsSubscribed(req.getPlatforms());
+        user.setEmailEnabled(req.isEmailEnabled());
         user.setNotifyBeforeMinutes(req.getNotifyBeforeMinutes());
         userRepo.save(user);
         return ResponseEntity.ok("Preference saved");
@@ -46,6 +48,7 @@ public class UserCntroller {
 
         Map<String, Object> preferences = new HashMap<>();
         preferences.put("platforms", user.getPlatformsSubscribed());
+        preferences.put("emailEnabled", user.isEmailEnabled());
         preferences.put("notifyBeforeMinutes", user.getNotifyBeforeMinutes());
 
         return ResponseEntity.ok(preferences);

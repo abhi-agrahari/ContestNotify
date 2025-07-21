@@ -35,7 +35,7 @@ public class EmailScheduling {
                         .filter(c -> {
                             LocalDateTime start = LocalDateTime.parse(c.getStartTime(), DateTimeFormatter.ISO_DATE_TIME);
                             long minBefore = Duration.between(start, LocalDateTime.now()).toMinutes();
-                            return minBefore == user.getNotifyBeforeMinutes();
+                            return minBefore <= user.getNotifyBeforeMinutes() && minBefore > user.getNotifyBeforeMinutes() - 2;
                         }).toList();
 
                 for (Contest contest : contests) {
