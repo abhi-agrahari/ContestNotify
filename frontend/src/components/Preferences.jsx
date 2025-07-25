@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import API from "../api";
 import { useNavigate } from "react-router-dom";
 
-const platformList = ["Codeforces", "LeetCode", "Atcoder", "CodeChef", "hackerrank", "hackerearth"];
-
 export default function Preferences() {
-  const [selectedPlatform, setSelectedPlatform] = useState([]);
-  const [notifyBeforeMinutes, setNotifyBeforeMinutes] = useState(30);
+  const [selected, setSelected] = useState([]);
+  const [emailEnabled, setEmailEnabled] = useState(false);
+  const [notifyBefore, setNotifyBefore] = useState(10);
   const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     const fetchPreferences = async () => {
       try {
-        const res = await API.get("/user/preferences", {
+        const prefRes = await API.get("/user/preferences", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSelectedPlatform(res.data.platforms || []);
-        setNotifyBeforeMinutes(res.data.notifyBeforeMinutes || 30);
+
+        setSelected(prefRes.data.platforms || []);
+        setEmailEnabled(prefRes.data.emailEnabled || false);
+        setNotifyBefore(prefRes.data.notifyBeforeMinutes || 10);
       } catch (err) {
-        setMessage("Please Login to save Preferences");
+        console.error(err);
+        setMessage("Failed to load preferences");
       }
     };
 
     fetchPreferences();
   }, []);
 
-  const handleCheckBox = (platform) => {
-    setSelectedPlatform((prev) =>
+  const handlePlatformChange = (platform) => {
+    setSelected((prev) =>
       prev.includes(platform)
         ? prev.filter((p) => p !== platform)
         : [...prev, platform]
@@ -40,75 +41,108 @@ export default function Preferences() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
       await API.post(
         "/user/preferences",
         {
-          platforms: selectedPlatform,
-          notifyBeforeMinutes,
+          platforms: selected,
+          emailEnabled,
+          notifyBeforeMinutes: notifyBefore,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMessage("✅ Preferences updated successfully");
-      navigate('/');
+      setMessage("Preferences updated successfully!");
+      navigate("/");
     } catch (err) {
-      setMessage("❌ Error updating preferences");
+      console.error(err);
+      setMessage("Failed to update preferences");
     }
   };
 
+  const allPlatforms = [
+    "Codeforces",
+    "LeetCode",
+    "Atcoder",
+    "CodeChef",
+    "HackerEarth",
+  ];
+
   return (
-    <div className="p-6 max-w-xl mx-auto mt-10 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Update Your Preferences</h2>
-      {message && (
-        <p
-          className={`mb-4 text-sm font-medium ${
-            message.includes("success") ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {message}
-        </p>
-      )}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white shadow-2xl rounded-xl p-6 sm:p-8 w-full max-w-lg">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
+          Preferences
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Platforms</label>
-          <div className="space-y-2">
-            {platformList.map((platform) => (
-              <label key={platform} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={selectedPlatform.includes(platform)}
-                  onChange={() => handleCheckBox(platform)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                />
-                <span className="text-gray-800">{platform}</span>
-              </label>
-            ))}
+        {message && (
+          <div className="mb-4 text-center text-sm text-blue-600 font-medium">
+            {message}
           </div>
-        </div>
+        )}
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Notify Before (minutes)
-          </label>
-          <input
-            type="number"
-            min="0"
-            value={notifyBeforeMinutes}
-            onChange={(e) => setNotifyBeforeMinutes(parseInt(e.target.value))}
-            className="w-full p-2 border border-gray-300 rounded shadow-sm focus:ring focus:ring-blue-200"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+        
+          <div className="font-semibold">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Select Platforms
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {allPlatforms.map((platform) => (
+                <label
+                  key={platform}
+                  className="flex items-center gap-2 text-gray-800"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(platform)}
+                    onChange={() => handlePlatformChange(platform)}
+                    className="accent-blue-600 w-4 h-4"
+                  />
+                  <span className="text-sm">{platform}</span>
+                </label>
+              ))}
+            </div>
+          </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
-        >
-          Save Preferences
-        </button>
-      </form>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-800 font-medium">
+              Email Notifications
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={emailEnabled}
+                onChange={(e) => setEmailEnabled(e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition duration-300"></div>
+              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform duration-300"></div>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Notify Before (minutes)
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={notifyBefore}
+              onChange={(e) =>
+                setNotifyBefore(Math.max(1, parseInt(e.target.value) || 1))
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="e.g., 10"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition duration-300"
+          >
+            Save Preferences
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
